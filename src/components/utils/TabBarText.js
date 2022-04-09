@@ -61,8 +61,9 @@ export default (props) => {
             :"rgb(0,0,0)"
           : "rgb(105, 161, 175)",
         fontSize: 10,
-        fontFamily: 'Montserrat_500Medium'
+        fontFamily: 'Montserrat_500Medium',
       }}
+      numberOfLines={1} adjustsFontSizeToFit
     >
       {props.title}
     </Text>

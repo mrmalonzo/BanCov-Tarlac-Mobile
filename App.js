@@ -1,7 +1,7 @@
 import React, {useState,  useEffect} from "react";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { ThemeProvider } from "react-native-rapi-ui";
-import { Text, StyleSheet,View, Linking} from "react-native";
+import { Text, StyleSheet,View, Linking, Dimensions} from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   useFonts,
@@ -88,9 +88,11 @@ export default function App() {
     getData();
   }, []);
 
+  const win = Dimensions.get('window'); //get window width and height
+
   const styles = StyleSheet.create({
     title:{
-      padding: 20,
+      padding: win.height/40,
       textAlign: "right",
       borderBottomWidth: 1,
       marginTop: 'auto',
@@ -121,3 +123,8 @@ export default function App() {
     );
   }
 }
+
+//TO DO:
+//LOADING SCREEN
+//ICON PICTURE
+//ALARM SYSTEM??

@@ -41,7 +41,7 @@ const MainTabs = ({covidData , setCovidData}) => {
         tabBarStyle: {
           borderTopColor: isDarkmode ? themeColor.dark100 : "#c0c0c0",
           backgroundColor: isDarkmode ? themeColor.dark200 : "#ffffff",
-          height: '8%'
+          height: '10%'
         },
       }}
     >
