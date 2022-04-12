@@ -23,7 +23,8 @@
       "favicon": "./assets/favicon.png"
     },
     "android": {
-      "package": "uplb.mrmalonzo"
+      "package": "uplb.mrmalonzo",
+      "versionCode":1
     }
   }
 }

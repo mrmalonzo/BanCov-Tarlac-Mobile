@@ -33,7 +33,7 @@ import httpServices from "../httpServices";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
 import {LineChart} from "react-native-chart-kit";
-import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
+// import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 // import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 // import { AreaChart, Grid } from 'react-native-svg-charts'
 // import * as shape from 'd3-shape'
@@ -88,7 +88,7 @@ export default function ({ covidData, setCovidData }) {
     async function setDateFunc(){
       setLoading(true)
       var today = new Date(covidData.currentDateUploaded);
-      var Update = monthNames[(today.getMonth())]+': '+today.getDate()+', '+today.getFullYear();
+      var Update = monthNames[(today.getMonth())]+' '+today.getDate()+', '+today.getFullYear();
       await setDate(Update)
 
       //get history for trend
@@ -265,7 +265,7 @@ export default function ({ covidData, setCovidData }) {
                   
                     <View style={styles.containerText}>
                       <Text style={[styles.casesTitle, styles.casesTitle1, {color:buttonCases? "black":"#FFB347"}]} numberOfLines={2} adjustsFontSizeToFit>New Cases{'\n'}</Text>
-                      <Text style={[styles.casesNumber, styles.casesTitle1, {color:buttonCases? "black":"#FFB347"}]} numberOfLines={1} adjustsFontSizeToFit>{covidData.currentTotalNewCases}</Text>
+                      <Text style={[styles.casesNumber, styles.casesTitle1, {color:buttonCases? "black":"#FFB347"}]} numberOfLines={1} adjustsFontSizeToFit>{covidData.currentTotalNewCases.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
                     </View>
          
                 </TouchableOpacity>
@@ -274,7 +274,7 @@ export default function ({ covidData, setCovidData }) {
                   
                     <View style={styles.containerText}>
                       <Text  style={[styles.casesTitle, styles.casesTitle2, {color:buttonRecoveries? "black":"#77DD77"}]} numberOfLines={2} adjustsFontSizeToFit>Recoveries{'\n'}</Text>
-                      <Text style={[styles.casesNumber, styles.casesTitle2, {color:buttonRecoveries? "black":"#77DD77"}]} numberOfLines={1} adjustsFontSizeToFit>{covidData.currentTotalRecoveries}</Text>
+                      <Text style={[styles.casesNumber, styles.casesTitle2, {color:buttonRecoveries? "black":"#77DD77"}]} numberOfLines={1} adjustsFontSizeToFit>{covidData.currentTotalRecoveries.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
                     </View>
                   
                 </TouchableOpacity>
@@ -283,7 +283,7 @@ export default function ({ covidData, setCovidData }) {
                   
                     <View style={styles.containerText}>
                       <Text style={[styles.casesTitle, styles.casesTitle3, {color:buttonDeaths? "black":"#FF6961"}]} numberOfLines={2} adjustsFontSizeToFit>Deaths{'\n'}</Text>
-                      <Text style={[styles.casesNumber, styles.casesTitle3, {color:buttonDeaths? "black":"#FF6961"}]} numberOfLines={1} adjustsFontSizeToFit>{covidData.currentTotalDeaths}</Text>
+                      <Text style={[styles.casesNumber, styles.casesTitle3, {color:buttonDeaths? "black":"#FF6961"}]} numberOfLines={1} adjustsFontSizeToFit>{covidData.currentTotalDeaths.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
                     </View>
                   
                 </TouchableOpacity>
