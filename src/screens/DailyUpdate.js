@@ -33,6 +33,17 @@ import httpServices from "../httpServices";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
 import {LineChart} from "react-native-chart-kit";
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer
+// } from "recharts";
+
 // import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 // import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 // import { AreaChart, Grid } from 'react-native-svg-charts'
@@ -51,7 +62,8 @@ const tableTitle = ["Anao","Bamban","Camiling","Capas","Concepcion","Gerona","La
 var historyCases;
 var historyRecoveries;
 var historyDeaths;
-var historyDates;
+// var historyDates;
+// const startDate = new Date(2020, 3, 14);
 
 export default function ({ covidData, setCovidData }) {
   const { isDarkmode, setTheme } = useTheme();
@@ -95,14 +107,11 @@ export default function ({ covidData, setCovidData }) {
       historyCases=[];
       historyRecoveries=[];
       historyDeaths=[];
-      historyDates=[];
+      // historyDates=[startDate, Update];
       covidData.historyCovidData.forEach((object)=>{
         historyCases.push(object.newCases)
         historyRecoveries.push(object.newRecoveries)
         historyDeaths.push(object.newDeaths)
-        var datee = new Date(object.recordDate);
-        var Updatee = monthNames[(datee.getMonth())]+' '+datee.getDate()+', '+datee.getFullYear();
-        historyDates.push(Updatee)
       })
 
       setLoading(false)
@@ -114,6 +123,9 @@ export default function ({ covidData, setCovidData }) {
     setRefreshing(true);
     const newData = await httpServices.viewAllData();
     await setCovidData(newData.data)
+    var today = new Date(newData.data.currentDateUploaded);
+		var Update = monthNames[(today.getMonth())]+' '+today.getDate()+', '+today.getFullYear();
+		await setDate(Update)
     try{
       await AsyncStorage.setItem(`covidData`, JSON.stringify(newData.data)).then(() => setRefreshing(false)); 
     }catch(e){
@@ -309,6 +321,7 @@ export default function ({ covidData, setCovidData }) {
           buttonCases  && !buttonRecoveries && !buttonDeaths && //render New Cases Table when button cases is clicked
 
           <View style={styles.container}>
+            <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80, textAlign:"center"}}>New Cases per Muncipality Breakdown</Text>
             <Table borderStyle={{borderWidth: 1}}>
               <Row data={tableHead1} flexArr={[2, 2, 2]} style={styles.head1} textStyle={styles.headTitle}/>
               <TableWrapper style={styles.wrapper}>
@@ -325,37 +338,45 @@ export default function ({ covidData, setCovidData }) {
           buttonCases  && !buttonRecoveries && !buttonDeaths && //render New Cases Trend when button cases is clicked
 
           <View style={{marginTop: win.height/60, alignItems: "center"}}>
-            <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>New Cases of Covid-19 Current Trend</Text>
+            <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>New Covid-19 Cases Trend in Tarlac</Text>
            <LineChart
 
           
               data={{
-                labels:historyDates, //check how you can shortn this: remove?
+                // labels:historyDates, //check how you can shortn this: remove?
                 datasets: [
                   {
                     data:historyCases
                   }
                 ]
               }}
-              width={win.width/1.1}
+              width={win.width}
               height={win.height/5}
+              style={{marginLeft:-win.width/30}}
               chartConfig={{
                   backgroundColor: "white",
                   backgroundGradientFrom: "white",
                   backgroundGradientTo: "white",
-                  decimalPlaces: 2, // optional, defaults to 2dp
+                  decimalPlaces: 0, // optional, defaults to 2dp
                   color: (opacity = 1) => `#FFB347`,
                   labelColor: (opacity = 1) => `black`,
                   style: {
                     borderRadius: 16
                   },
                   propsForDots: {
-                    r: "6",
-                    strokeWidth: "2",
+                    r: "0",
+                    strokeWidth: "1",
                     stroke: "#ffa726"
                   }
                 }}
+                withDots={false}
+                verticalLabelRotation={100}
+                bezier
+                withInnerLines={false}
+                withOuterLines={false}
+                xAxisSuffix="Span of Covid-19 in Tarlac"
             />
+           
           </View>
          
         }
@@ -365,6 +386,7 @@ export default function ({ covidData, setCovidData }) {
           !buttonCases  && buttonRecoveries && !buttonDeaths && //render New Recoveries Table when button recovies is clicked
 
           <View style={styles.container}>
+            <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80, textAlign:"center"}}>New Recoveries per Municipality Breakdown</Text>
             <Table borderStyle={{borderWidth: 1}}>
               <Row data={tableHead2} flexArr={[2, 2, 2]} style={styles.head2} textStyle={styles.headTitle}/>
               <TableWrapper style={styles.wrapper}>
@@ -380,25 +402,26 @@ export default function ({ covidData, setCovidData }) {
           !buttonCases  && buttonRecoveries && !buttonDeaths && //render New Recoveries Trend when button recovies is clicked
 
           <View style={{marginTop: win.height/60, alignItems: "center"}}>
-              <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>Recoveries of Covid-19 Current Trend</Text>
+              <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>New Covid-19 Recoveries Trend in Tarlac</Text>
             <LineChart
 
             
                 data={{
-                  labels:historyDates, //check how you can shortn this: remove?
+                  // labels:historyDates, //check how you can shortn this: remove?
                   datasets: [
                     {
                       data:historyRecoveries
                     }
                   ]
                 }}
-                width={win.width/1.1}
+                width={win.width}
                 height={win.height/5}
+                style={{marginLeft:-win.width/30}}
                 chartConfig={{
                     backgroundColor: "white",
                     backgroundGradientFrom: "white",
                     backgroundGradientTo: "white",
-                    decimalPlaces: 2, // optional, defaults to 2dp
+                    decimalPlaces: 0, // optional, defaults to 2dp
                     color: (opacity = 1) => `#77DD77`,
                     labelColor: (opacity = 1) => `black`,
                     style: {
@@ -410,6 +433,11 @@ export default function ({ covidData, setCovidData }) {
                       stroke: "#77DD80"
                     }
                   }}
+                  withDots={false}
+                  verticalLabelRotation={100}
+                  bezier
+                  withInnerLines={false}
+                  withOuterLines={false}
               />
             </View>
         }
@@ -419,6 +447,7 @@ export default function ({ covidData, setCovidData }) {
           !buttonCases  && !buttonRecoveries && buttonDeaths && //render New Deaths Table when button Deaths is clicked
 
           <View style={styles.container}>
+            <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80, textAlign:"center"}}>New Deaths per Municipality Breakdown</Text>
             <Table borderStyle={{borderWidth: 1}}>
               <Row data={tableHead3} flexArr={[2, 2, 2]} style={styles.head3} textStyle={styles.headTitle}/>
               <TableWrapper style={styles.wrapper}>
@@ -434,25 +463,26 @@ export default function ({ covidData, setCovidData }) {
           !buttonCases  && !buttonRecoveries && buttonDeaths && //render New Deaths Table when button Deaths is clicked
 
           <View style={{marginTop: win.height/60, alignItems: "center"}}>
-              <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>Deaths of Covid-19 Current Trend</Text>
+              <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>New Covid-19 Deaths Trend in Tarlac</Text>
             <LineChart
 
             
                 data={{
-                  labels:historyDates, //check how you can shortn this: remove?
+                  // labels:historyDates, //check how you can shortn this: remove?
                   datasets: [
                     {
                       data:historyDeaths
                     }
                   ]
                 }}
-                width={win.width/1.1}
+                width={win.width}
                 height={win.height/5}
+                style={{marginLeft:-win.width/30}}
                 chartConfig={{
                     backgroundColor: "white",
                     backgroundGradientFrom: "white",
                     backgroundGradientTo: "white",
-                    decimalPlaces: 2, // optional, defaults to 2dp
+                    decimalPlaces: 0, // optional, defaults to 2dp
                     color: (opacity = 1) => `#FF6961`,
                     labelColor: (opacity = 1) => `black`,
                     style: {
@@ -464,6 +494,11 @@ export default function ({ covidData, setCovidData }) {
                       stroke: "#FF6961"
                     }
                   }}
+                  withDots={false}
+                  verticalLabelRotation={100}
+                  bezier
+                  withInnerLines={false}
+                  withOuterLines={false}
               />
             </View>
           

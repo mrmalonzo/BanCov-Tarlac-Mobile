@@ -51,9 +51,6 @@ export default function ({ covidData, setCovidData }) {
 	const [loading, setLoading] = useState(true);
 	const [date, setDate] = useState("")
 	const [refreshing, setRefreshing] = useState(false);
-	const [buttonCases, setButtonCases] = useState(false);
-	const [buttonRecoveries, setButtonRecoveries] = useState(false);
-	const [buttonDeaths, setButtonDeaths] = useState(false);
   
 	
 	let [fontsLoaded] = useFonts({ //import fonts
@@ -138,7 +135,7 @@ export default function ({ covidData, setCovidData }) {
 		  },
 		  section:{
 			// width:"50%"
-			marginTop: "5%"
+			// marginTop: "5%"
 		  },
 		  sectionContent:{
 			// width:"50%",
@@ -338,33 +335,40 @@ export default function ({ covidData, setCovidData }) {
             <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>Active Cases of Covid-19 Trend</Text>
            <LineChart
 
-          
-              data={{
-                labels:historyDates, //check how you can shortn this: remove?
-                datasets: [
-                  {
-                    data:historyCases
-                  }
-                ]
-              }}
-              width={win.width/1.1}
-              height={win.height/5}
-              chartConfig={{
-                  backgroundColor: "white",
-                  backgroundGradientFrom: "white",
-                  backgroundGradientTo: "white",
-                  decimalPlaces: 2, // optional, defaults to 2dp
-                  color: (opacity = 1) => `#69A1AF`,
-                  labelColor: (opacity = 1) => `black`,
-                  style: {
-                    borderRadius: 16
-                  },
-                  propsForDots: {
-                    r: "6",
-                    strokeWidth: "2",
-                    stroke: "#69A1AF"
-                  }
-                }}
+					
+			data={{
+				// labels:historyDates, //check how you can shortn this: remove?
+				datasets: [
+				{
+					data:historyCases
+				}
+				]
+			}}
+			width={win.width}
+			height={win.height/5}
+			style={{marginLeft:-win.width/30}}
+			chartConfig={{
+				backgroundColor: "white",
+				backgroundGradientFrom: "white",
+				backgroundGradientTo: "white",
+				decimalPlaces: 0, // optional, defaults to 2dp
+				color: (opacity = 1) => `#69A1AF`,
+				labelColor: (opacity = 1) => `black`,
+				style: {
+					borderRadius: 16
+				},
+				propsForDots: {
+					r: "0",
+					strokeWidth: "1",
+					stroke: "#69A1AF"
+				}
+				}}
+				withDots={false}
+				verticalLabelRotation={100}
+				bezier
+				withInnerLines={false}
+				withOuterLines={false}
+				xAxisSuffix="Span of Covid-19 in Tarlac"
             />
           </View>
          
