@@ -33,6 +33,9 @@ import httpServices from "../httpServices";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
 import {LineChart} from "react-native-chart-kit";
+import ToggleSwitch from 'toggle-switch-react-native'
+import MapView, { Marker, Polyline } from 'react-native-maps-osmdroid';
+import {border, marker} from "../../assets/tarlacBorder.js"
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -51,6 +54,13 @@ export default function ({ covidData, setCovidData }) {
 	const [loading, setLoading] = useState(true);
 	const [date, setDate] = useState("")
 	const [refreshing, setRefreshing] = useState(false);
+	const [showDetails, setShowDetails] = useState(false);
+	const [mapRegion, setmapRegion] = useState({
+		latitude:15.485611015970282,
+		longitude:120.49515484855495,
+		latitudeDelta: 0.5,
+		longitudeDelta: 0.5,
+	  });
   
 	
 	let [fontsLoaded] = useFonts({ //import fonts
@@ -262,6 +272,19 @@ export default function ({ covidData, setCovidData }) {
 		  row: {  height: 28  },
 		  text: { textAlign: 'center', fontFamily:"Montserrat_500Medium" },
 	  
+		  containerMap: {
+			flex: 1,
+			backgroundColor: '#fff',
+			alignItems: 'center',
+			justifyContent: 'center',
+			marginTop:win.height/60,
+			borderRadius:win.width/20,
+			overflow:"hidden"
+		  },
+		  map: {
+			width: win.width/1.13,
+			height: win.height/1.5,
+		  },
 	  });	
 
 	if (!fontsLoaded || loading) {
@@ -317,8 +340,58 @@ export default function ({ covidData, setCovidData }) {
 					<Text style={[styles.casesNumberSpec]} numberOfLines={1} adjustsFontSizeToFit>{covidData.overallActiveCases.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
 					</View>
 
+				</View>
+
+			
+				<View style={{alignItems:"center", marginTop: win.height/60}}>
+					<Text style={{fontFamily:'Montserrat_600SemiBold', fontSize:win.height/50, marginBottom: win.height/100}}>Active Cases in Tarlac</Text>
+					<ToggleSwitch
+						isOn={showDetails}
+						onColor="#69A1AF"
+						offColor="gray"
+						label="Show Heat Map"
+						labelStyle={{ fontFamily:'Montserrat_500Medium', fontSize:win.height/70 }}
+						size="medium"
+						onToggle={() =>setShowDetails(!showDetails)}
+					/>
+				</View>
+
+		{
+		
+			showDetails && 
+
+
+			<View style={styles.containerMap}>
+				<MapView  //This is for the HeatMap
+					style={styles.map} 
+					region={mapRegion}
+				>
+
+				
+				{marker.map((municipality, index)=>{ //Markers for municipalities
+					return <Marker key={index} coordinate={{
+						latitude:municipality.latitude,
+						longitude:municipality.longitude
+					}}
+					title={municipality.title}
+					>
+					</Marker>
+				})}
+				
+					<Polyline 
+						coordinates={border} //for Tarlac Province Borders
+						strokeWidth={6}        
+						strokeColor='#69A1AF' 
+						// fillColor='none' 
+					/>
+
+				</MapView>
 			</View>
+
+		}
       
+		{
+			!showDetails &&
 
           <View style={styles.container}>
             <Table borderStyle={{borderWidth: 1}}>
@@ -330,6 +403,10 @@ export default function ({ covidData, setCovidData }) {
               </TableWrapper>
             </Table>
           </View>
+		}
+
+		{
+			!showDetails &&
 
 		  <View style={{marginTop: win.height/60, alignItems: "center"}}>
             <Text style={{fontFamily: 'Montserrat_600SemiBold', marginBottom:win.height/80}}>Active Cases of Covid-19 Trend</Text>
@@ -371,6 +448,7 @@ export default function ({ covidData, setCovidData }) {
 				xAxisSuffix="Span of Covid-19 in Tarlac"
             />
           </View>
+		}
          
   
 			</ScrollView>
