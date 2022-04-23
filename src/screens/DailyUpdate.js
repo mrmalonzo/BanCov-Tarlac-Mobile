@@ -1,8 +1,7 @@
 import React, {useState, useEffect, useRef} from "react";
-import { Text, StyleSheet,View, Linking,  TouchableOpacity, Image, ScrollView, RefreshControl, Dimensions } from "react-native";
+import { Text, StyleSheet,View, TouchableOpacity, Image, ScrollView, RefreshControl, Dimensions } from "react-native";
 import {
   Layout,
-  Button,
   Section,
   SectionContent,
   useTheme,
@@ -31,23 +30,8 @@ import {
 import AppLoading from 'expo-app-loading';
 import httpServices from "../httpServices";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
+import { Table, TableWrapper, Row,Col,} from 'react-native-table-component';
 import {LineChart} from "react-native-chart-kit";
-// import {
-//   LineChart,
-//   Line,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   Legend,
-//   ResponsiveContainer
-// } from "recharts";
-
-// import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
-// import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
-// import { AreaChart, Grid } from 'react-native-svg-charts'
-// import * as shape from 'd3-shape'
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -62,11 +46,9 @@ const tableTitle = ["Anao","Bamban","Camiling","Capas","Concepcion","Gerona","La
 var historyCases;
 var historyRecoveries;
 var historyDeaths;
-// var historyDates;
-// const startDate = new Date(2020, 3, 14);
 
-export default function ({ covidData, setCovidData }) {
-  const { isDarkmode, setTheme } = useTheme();
+
+export default function ({ covidData, setCovidData }) { //daily update page
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState("")
   const [refreshing, setRefreshing] = useState(false);
@@ -96,32 +78,36 @@ export default function ({ covidData, setCovidData }) {
     Montserrat_900Black_Italic,
   });
 
-  useEffect(() => { 
+  useEffect(() => { //for when the page first opens
     async function setDateFunc(){
       setLoading(true)
+
+      //get current uploaded data date
       var today = new Date(covidData.currentDateUploaded);
       var Update = monthNames[(today.getMonth())]+' '+today.getDate()+', '+today.getFullYear();
       await setDate(Update)
 
-      //get history for trend
+      //get history for the trend graph
       historyCases=[];
       historyRecoveries=[];
       historyDeaths=[];
-      // historyDates=[startDate, Update];
       covidData.historyCovidData.forEach((object)=>{
         historyCases.push(object.newCases)
         historyRecoveries.push(object.newRecoveries)
         historyDeaths.push(object.newDeaths)
       })
 
-      setLoading(false)
+      setLoading(false) //to render the app
     }
     setDateFunc();
   }, []);
 
   const onRefresh = React.useCallback(async () => { //refresh and get new data per user command
     setRefreshing(true);
-    const newData = await httpServices.viewAllData();
+
+    const newData = await httpServices.viewAllData(); //get the new data
+
+    //redo all operations when page first renderrs
     await setCovidData(newData.data)
     var today = new Date(newData.data.currentDateUploaded);
 		var Update = monthNames[(today.getMonth())]+' '+today.getDate()+', '+today.getFullYear();
@@ -131,7 +117,6 @@ export default function ({ covidData, setCovidData }) {
      historyCases=[];
      historyRecoveries=[];
      historyDeaths=[];
-     // historyDates=[startDate, Update];
      covidData.historyCovidData.forEach((object)=>{
        historyCases.push(object.newCases)
        historyRecoveries.push(object.newRecoveries)
@@ -155,11 +140,9 @@ export default function ({ covidData, setCovidData }) {
 		});
 	  }	
 
+  //Stylesheet of the page
   const styles = StyleSheet.create({
     containerMain: {
-      // flex: 6,
-      // justifyContent: "flex-end",
-      // flexDirection: "row",
       backgroundColor: "white"
     },
     title:{
@@ -179,13 +162,10 @@ export default function ({ covidData, setCovidData }) {
       color:'rgb(101,201,92)'
     },
     section:{
-      // width:"50%"
       marginTop: "5%"
     },
     sectionContent:{
-      // width:"50%",
       flex: 3,
-      // borderWidth:1,
       backgroundColor: "rgb(255,255,255)",
       width:"100%",
       height:350
@@ -211,11 +191,9 @@ export default function ({ covidData, setCovidData }) {
       padding: 0,
       marginTop: "8%",
       marginBottom:"-10%"
-      // borderWidth: 3
     },
     buttonCases:{
       width:"10%",
-      // minHeight:"30%",
       height:win.height/4.75,
       flex:2,
       textAlign:"center",
@@ -239,7 +217,6 @@ export default function ({ covidData, setCovidData }) {
       height:"65%",
       flexDirection:"column",
       justifyContent:"center",
-      // borderWidth: 2,
     },
     casesTitle:{
       textAlign: "center",
@@ -261,7 +238,8 @@ export default function ({ covidData, setCovidData }) {
       fontFamily: 'Montserrat_800ExtraBold',
     },
 
-    container: { flex: 1, padding: 16, paddingTop: 10, backgroundColor: '#fff', marginTop:'-10%' }, //change margin top if you waant to include toggleable heat map
+    //for the table
+    container: { flex: 1, padding: 16, paddingTop: 10, backgroundColor: '#fff', marginTop:'-10%' },
     head1: {  height: 40,  backgroundColor: '#FFB347' },
     head2: {  height: 40,  backgroundColor: '#77DD77' },
     head3: {  height: 40,  backgroundColor: '#FF6961' },
@@ -271,6 +249,7 @@ export default function ({ covidData, setCovidData }) {
     row: {  height: 28  },
     text: { textAlign: 'center', fontFamily:"Montserrat_500Medium" },
 
+    //To make the button look better when clicked
     elevation: {
       elevation: 20,
       shadowColor: 'rgba(0, 0, 0, 0.35)',
@@ -281,7 +260,7 @@ export default function ({ covidData, setCovidData }) {
   });
 
 
-  if (!fontsLoaded || loading) {
+  if (!fontsLoaded || loading) { //don't load app if fonts are not loaded or there is an operation happening
     return <AppLoading />;
   } else {
     return (
@@ -363,7 +342,6 @@ export default function ({ covidData, setCovidData }) {
 
           
               data={{
-                // labels:historyDates, //check how you can shortn this: remove?
                 datasets: [
                   {
                     data:historyCases
@@ -377,7 +355,7 @@ export default function ({ covidData, setCovidData }) {
                   backgroundColor: "white",
                   backgroundGradientFrom: "white",
                   backgroundGradientTo: "white",
-                  decimalPlaces: 0, // optional, defaults to 2dp
+                  decimalPlaces: 0, 
                   color: (opacity = 1) => `#FFB347`,
                   labelColor: (opacity = 1) => `black`,
                   style: {
@@ -427,7 +405,6 @@ export default function ({ covidData, setCovidData }) {
 
             
                 data={{
-                  // labels:historyDates, //check how you can shortn this: remove?
                   datasets: [
                     {
                       data:historyRecoveries
@@ -441,7 +418,7 @@ export default function ({ covidData, setCovidData }) {
                     backgroundColor: "white",
                     backgroundGradientFrom: "white",
                     backgroundGradientTo: "white",
-                    decimalPlaces: 0, // optional, defaults to 2dp
+                    decimalPlaces: 0, 
                     color: (opacity = 1) => `#77DD77`,
                     labelColor: (opacity = 1) => `black`,
                     style: {
@@ -472,7 +449,6 @@ export default function ({ covidData, setCovidData }) {
               <Row data={tableHead3} flexArr={[2, 2, 2]} style={styles.head3} textStyle={styles.headTitle}/>
               <TableWrapper style={styles.wrapper}>
                 <Col data={tableTitle} style={styles.title} heightArr={[28,28]} textStyle={styles.text}/>
-                {/* <Rows data={state.tableData} flexArr={[2, 1, 1]} style={styles.row} textStyle={styles.text}/> */}
                 <Col data={Object.values(covidData.currentDeathsBreakdown)} style={styles.title} heightArr={[28,28]} textStyle={styles.text}/>
               </TableWrapper>
             </Table>
@@ -488,7 +464,6 @@ export default function ({ covidData, setCovidData }) {
 
             
                 data={{
-                  // labels:historyDates, //check how you can shortn this: remove?
                   datasets: [
                     {
                       data:historyDeaths
@@ -502,7 +477,7 @@ export default function ({ covidData, setCovidData }) {
                     backgroundColor: "white",
                     backgroundGradientFrom: "white",
                     backgroundGradientTo: "white",
-                    decimalPlaces: 0, // optional, defaults to 2dp
+                    decimalPlaces: 0,
                     color: (opacity = 1) => `#FF6961`,
                     labelColor: (opacity = 1) => `black`,
                     style: {
@@ -524,8 +499,6 @@ export default function ({ covidData, setCovidData }) {
           
         }
           
-
-       
         </ScrollView>
       </Layout>
     );

@@ -1,11 +1,9 @@
 import React, {useState, useEffect, useRef} from "react";
-import { Text, StyleSheet,View, Linking,  TouchableOpacity, Image, ScrollView, RefreshControl, Dimensions } from "react-native";
+import { Text, StyleSheet,View, ScrollView, RefreshControl, Dimensions } from "react-native";
 import {
   Layout,
-  Button,
   Section,
   SectionContent,
-  useTheme,
 } from "react-native-rapi-ui";
 import {
   useFonts,
@@ -31,7 +29,7 @@ import {
 import AppLoading from 'expo-app-loading';
 import httpServices from "../httpServices";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
+import { Table, TableWrapper, Row,  Col} from 'react-native-table-component';
 import {LineChart} from "react-native-chart-kit";
 import ToggleSwitch from 'toggle-switch-react-native'
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -41,30 +39,29 @@ const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
+//for table labels
 const tableHead1 = ["Municipality", "Active Cases"]
 const tableTitle = ["Anao","Bamban","Camiling","Capas","Concepcion","Gerona","Lapaz","Mayantoc","Moncada","Paniqui","Pura","Ramos","San Clemente", "San Jose","San Manuel","Santa Ignacia","Tarlac City","Victoria"]
 
 //for the Trend Chart
 var historyCases;
-var historyRecoveries;
-var historyDeaths;
 var historyDates;
 
 //for Tarlac Municipality Markers and heatmap
 
-export default function ({ covidData, setCovidData }) {
+export default function ({ covidData, setCovidData }) { //overall update page
 	const [loading, setLoading] = useState(true);
 	const [date, setDate] = useState("")
 	const [refreshing, setRefreshing] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
 	const scrollRef = useRef();
-	const [mapRegion, setmapRegion] = useState({
+	const [mapRegion, setmapRegion] = useState({ //for origin in google map
 		latitude:15.485611015970282,
 		longitude:120.49515484855495,
 		latitudeDelta: 0.5,
 		longitudeDelta: 0.5,
 	  });
-	const [marker, setMarker] = useState( 
+	const [marker, setMarker] = useState( //for the heatmap weights and locations
 		[
 		{
 			latitude: 15.743725713267793, 
@@ -199,9 +196,11 @@ export default function ({ covidData, setCovidData }) {
 	  Montserrat_900Black_Italic,
 	});
 
-	useEffect(() => { 
+	useEffect(() => { //when page is first rendered
 		async function setDateFunc(){
 		  setLoading(true)
+
+		  //get current upload date
 		  var today = new Date(covidData.currentDateUploaded);
 		  var Update = monthNames[(today.getMonth())]+' '+today.getDate()+', '+today.getFullYear();
 		  await setDate(Update)
@@ -216,12 +215,7 @@ export default function ({ covidData, setCovidData }) {
 			historyDates.push(Updatee)
 		  })
 
-		  //add current active cases to heatmap markers for heatmap
-
-		//   Object.keys(covidData.overallActiveCasesBreakdown).forEach((municipality, index)=>{
-		// 	marker[index].weight = covidData.overallActiveCasesBreakdown[municipality]
-		//   });
-
+		//add current active cases to heatmap markers for the weight of the heatmap
 		await setMarker(()=>{ //Update weight. Needs a workaround to prevent changing frozen values
 			let clonedArray = JSON.parse(JSON.stringify(marker)) //deep clone original marker
 			Object.keys(covidData.overallActiveCasesBreakdown).forEach((municipality, index)=>{ //then update it's weight
@@ -231,16 +225,18 @@ export default function ({ covidData, setCovidData }) {
 		})
 		
 
-		  setLoading(false)
+		  setLoading(false) //to make app render
 		}
 		setDateFunc();
 	  }, []);
 
 	  const onRefresh = React.useCallback(async () => { //refresh and get new data per user command
 		setRefreshing(true);
-		const newData = await httpServices.viewAllData();
+		const newData = await httpServices.viewAllData(); //get new data
 		await setCovidData(newData.data)
 		
+		//redo all the operations that you do when the page first renders
+
 		//get history for trend
 		historyCases=[];
 		historyDates=[];
@@ -276,11 +272,9 @@ export default function ({ covidData, setCovidData }) {
 		setShowDetails(!showDetails);
 	  }	
 	
+	//stylesheet of the page
 	const styles = StyleSheet.create({
 		containerMain: {
-			// flex: 6,
-			// justifyContent: "flex-end",
-			// flexDirection: "row",
 			backgroundColor: "white"
 		  },
 		  title:{
@@ -300,13 +294,9 @@ export default function ({ covidData, setCovidData }) {
 			color:'rgb(101,201,92)'
 		  },
 		  section:{
-			// width:"50%"
-			// marginTop: "5%"
 		  },
 		  sectionContent:{
-			// width:"50%",
 			flex: 3,
-			// borderWidth:1,
 			backgroundColor: "rgb(255,255,255)",
 			width:"100%",
 			height:350
@@ -335,11 +325,9 @@ export default function ({ covidData, setCovidData }) {
 			padding: 0,
 			marginTop: "8%",
 			marginBottom:"-10%"
-			// borderWidth: 3
 		  },
 		  buttonCases:{
 			width:"10%",
-			// minHeight:"30%",
 			height:win.height/4.75,
 			flex:2,
 			textAlign:"center",
@@ -366,7 +354,6 @@ export default function ({ covidData, setCovidData }) {
 			height:"65%",
 			flexDirection:"column",
 			justifyContent:"center",
-			// borderWidth: 2,
 		  },
 		  casesTitle:{
 			textAlign: "center",
@@ -389,12 +376,10 @@ export default function ({ covidData, setCovidData }) {
 
 		  buttonCasesSpec:{
 			width:"90%",
-			// minHeight:"30%",
 			height:win.height/6,
 			flex:6,
 			textAlign:"center",
 			marginLeft:"5%",
-			// padding: 0,
 			borderWidth: 1,
 			justifyContent:"center",
 			borderRadius: 10,
@@ -583,7 +568,6 @@ export default function ({ covidData, setCovidData }) {
 
 					
 			data={{
-				// labels:historyDates, //check how you can shortn this: remove?
 				datasets: [
 				{
 					data:historyCases
@@ -597,7 +581,7 @@ export default function ({ covidData, setCovidData }) {
 				backgroundColor: "white",
 				backgroundGradientFrom: "white",
 				backgroundGradientTo: "white",
-				decimalPlaces: 0, // optional, defaults to 2dp
+				decimalPlaces: 0,
 				color: (opacity = 1) => `#69A1AF`,
 				labelColor: (opacity = 1) => `black`,
 				style: {

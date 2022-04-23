@@ -80,7 +80,6 @@ export default ({covidData, setCovidData}) => {
   return (
     <NavigationContainer>
       <Main covidData={covidData} setCovidData={setCovidData}/>
-      {/* {console.log(covidData)} */}
     </NavigationContainer>
   );
 };
