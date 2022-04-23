@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import { Text, StyleSheet,View, Linking,  TouchableOpacity, Image, ScrollView, RefreshControl, Dimensions } from "react-native";
 import {
   Layout,
@@ -34,8 +34,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
 import {LineChart} from "react-native-chart-kit";
 import ToggleSwitch from 'toggle-switch-react-native'
-import MapView, { Marker, Polyline } from 'react-native-maps-osmdroid';
-import {border, marker} from "../../assets/tarlacBorder.js"
+import MapView, { Marker, Polyline } from 'react-native-maps';
+import {border} from "../../assets/tarlacBorder.js"
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -50,18 +50,133 @@ var historyRecoveries;
 var historyDeaths;
 var historyDates;
 
+//for Tarlac Municipality Markers and heatmap
+
 export default function ({ covidData, setCovidData }) {
 	const [loading, setLoading] = useState(true);
 	const [date, setDate] = useState("")
 	const [refreshing, setRefreshing] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
+	const scrollRef = useRef();
 	const [mapRegion, setmapRegion] = useState({
 		latitude:15.485611015970282,
 		longitude:120.49515484855495,
 		latitudeDelta: 0.5,
 		longitudeDelta: 0.5,
 	  });
-  
+	const [marker, setMarker] = useState( 
+		[
+		{
+			latitude: 15.743725713267793, 
+			longitude:120.61475222375674,
+			title:"Anao",
+			weight:0
+		},
+		{
+			latitude: 15.291531313054659, 
+			longitude:120.57340152894659,
+			title:"Bamban",
+			weight:0
+		},
+		{
+			latitude: 15.691793631341804,
+			longitude: 120.41504411972757,
+			title:"Camiling",
+			weight:0
+		},
+		{
+			latitude:15.335192285909459,
+			longitude: 120.59160552461964 ,
+			title:"Capas",
+			weight:0
+		},
+		{
+			latitude:15.321978350380855,
+			longitude: 120.6562980391059,
+			title:"Concepcion",
+			weight:0
+		},
+		{
+			latitude:15.607745808297068,
+			longitude: 120.6012166410495,
+			title:"Gerona",
+			weight:0
+		},
+		{
+			latitude:15.450353201560606,
+			longitude:120.72066920624569,
+			title:"La Paz",
+			weight:0
+		},
+		{
+			latitude:15.560962124853347,
+			longitude:  120.32274211954645,
+			title: "Mayantoc",
+			weight:0
+		},
+		{
+			latitude: 15.732929205488874,
+			longitude: 120.5671717428838,
+			title:"Moncada",
+			weight:0
+		},
+		{
+			latitude:15.663537159847348,
+			longitude: 120.55533425187551,
+			title:"Paniqui",
+			weight:0
+		},
+		{
+			latitude:15.620058187240485,
+			longitude: 120.65153287514342,
+			title:"Pura",
+			weight:0
+		},
+		{
+			latitude:15.668449835887726,
+			longitude:120.6381647162391,
+			title:"Ramos",
+			weight:0
+		},
+		{
+			latitude: 15.709351218027015, 
+			longitude:120.36290621977564,
+			title: "San Clemente",
+			weight:0
+		},
+		{	latitude: 15.420795255513864,
+			longitude: 120.29881516610722,
+			title:"San Jose",
+			weight:0
+		},
+		{
+			latitude:15.491233345396322,
+			longitude:120.66549944967403,
+			title:"San Manuel",
+			weight:0
+		},
+		{
+			latitude:15.583478984536779,
+			longitude: 120.47528135927602,
+			title:"Santa Ignacia",
+			weight:0
+		},
+		{
+			latitude: 15.478631633285406,
+			longitude:120.59554020573438,
+			title:"Tarlac City",
+			weight:0
+		},
+		{	latitude: 15.588533238496563,
+			longitude:120.69426600906068,
+			title:"Victoria",
+			weight:0
+		},
+	
+	]
+	)
+
+
 	
 	let [fontsLoaded] = useFonts({ //import fonts
 	  Montserrat_100Thin,
@@ -100,7 +215,22 @@ export default function ({ covidData, setCovidData }) {
 			var Updatee = monthNames[(datee.getMonth())]+' '+datee.getDate()+', '+datee.getFullYear();
 			historyDates.push(Updatee)
 		  })
-	
+
+		  //add current active cases to heatmap markers for heatmap
+
+		//   Object.keys(covidData.overallActiveCasesBreakdown).forEach((municipality, index)=>{
+		// 	marker[index].weight = covidData.overallActiveCasesBreakdown[municipality]
+		//   });
+
+		await setMarker(()=>{ //Update weight. Needs a workaround to prevent changing frozen values
+			let clonedArray = JSON.parse(JSON.stringify(marker)) //deep clone original marker
+			Object.keys(covidData.overallActiveCasesBreakdown).forEach((municipality, index)=>{ //then update it's weight
+				clonedArray[index].weight = covidData.overallActiveCasesBreakdown[municipality]
+			});
+			return clonedArray;
+		})
+		
+
 		  setLoading(false)
 		}
 		setDateFunc();
@@ -110,15 +240,41 @@ export default function ({ covidData, setCovidData }) {
 		setRefreshing(true);
 		const newData = await httpServices.viewAllData();
 		await setCovidData(newData.data)
+		
+		//get history for trend
+		historyCases=[];
+		historyDates=[];
+		covidData.historyCovidData.forEach((object)=>{
+			historyCases.push(object.activeCases)
+			var datee = new Date(object.recordDate);
+			var Updatee = monthNames[(datee.getMonth())]+' '+datee.getDate()+', '+datee.getFullYear();
+			historyDates.push(Updatee)
+		})
+
+		await setMarker(()=>{ //Update weight. Needs a workaround to prevent changing frozen values
+			let clonedArray = JSON.parse(JSON.stringify(marker)) //deep clone original marker
+			Object.keys(newData.data.overallActiveCasesBreakdown).forEach((municipality, index)=>{ //then update it's weight
+				clonedArray[index].weight = newData.data.overallActiveCasesBreakdown[municipality]
+			});
+			return clonedArray;
+		})
+
 		try{
 		  await AsyncStorage.setItem(`covidData`, JSON.stringify(newData.data)).then(() => setRefreshing(false)); 
 		}catch(e){
 		  console.log(e)
 		}
 	  }, []);
-	
+
 	  const win = Dimensions.get('window'); //get window width and height
-	
+
+	  const onPressTouch = () => { //when toggle heat map is clicked - scroll to bottom screen and show heat map
+		scrollRef.current?.scrollTo({
+		  y: win.height/1.8,
+		  animated: true,
+		});
+		setShowDetails(!showDetails);
+	  }	
 	
 	const styles = StyleSheet.create({
 		containerMain: {
@@ -264,7 +420,7 @@ export default function ({ covidData, setCovidData }) {
 		  },
 
 
-		  container: { flex: 1, padding: 16, paddingTop: 10, backgroundColor: '#fff', marginTop:'5%' }, //change margin top if you waant to include toggleable heat map
+		  container: { flex: 1, padding: 16, paddingTop: 10, backgroundColor: '#fff', marginTop:'2%' }, //change margin top if you waant to include toggleable heat map
 		  head1: {  height: 40,  backgroundColor: '#69A1AF' },
 		  headTitle:{textAlign: 'center', fontFamily: 'Montserrat_600SemiBold'},
 		  wrapper: { flexDirection: 'row' },
@@ -275,15 +431,19 @@ export default function ({ covidData, setCovidData }) {
 		  containerMap: {
 			flex: 1,
 			backgroundColor: '#fff',
-			alignItems: 'center',
+			alignSelf: 'center',
 			justifyContent: 'center',
 			marginTop:win.height/60,
 			borderRadius:win.width/20,
-			overflow:"hidden"
-		  },
-		  map: {
+			overflow:"hidden",
 			width: win.width/1.13,
 			height: win.height/1.5,
+			borderWidth:1,
+			borderColor:"#69A1AF"
+		  },
+		  map: {
+			width:"100%",
+			height: "100%",
 		  },
 	  });	
 
@@ -293,7 +453,7 @@ export default function ({ covidData, setCovidData }) {
 	else {
 		return (
 			<Layout>
-			<ScrollView style={styles.containerMain}  refreshControl={<RefreshControl refreshing={refreshing}onRefresh={onRefresh}/> }>
+			<ScrollView ref={scrollRef} style={styles.containerMain}  refreshControl={<RefreshControl refreshing={refreshing}onRefresh={onRefresh}/> }>
 			  <Section style={styles.section}>
 				<SectionContent style={styles.sectionContent}>
 				<Text style={styles.sectionTitle} numberOfLines={2} adjustsFontSizeToFit>TARLAC CUMULATIVE COVID-19 UPDATE: </Text>
@@ -352,7 +512,8 @@ export default function ({ covidData, setCovidData }) {
 						label="Show Heat Map"
 						labelStyle={{ fontFamily:'Montserrat_500Medium', fontSize:win.height/70 }}
 						size="medium"
-						onToggle={() =>setShowDetails(!showDetails)}
+						onToggle={onPressTouch}				
+
 					/>
 				</View>
 
@@ -360,12 +521,20 @@ export default function ({ covidData, setCovidData }) {
 		
 			showDetails && 
 
-
+			//HeatMap using React Native Maps - Google Map
 			<View style={styles.containerMap}>
-				<MapView  //This is for the HeatMap
+				<MapView  
 					style={styles.map} 
 					region={mapRegion}
 				>
+
+				<MapView.Heatmap points={marker}
+                         opacity={1}
+                         radius={50}
+                         maxIntensity={100}
+                         gradientSmoothing={10}
+                         heatmapMode={"POINTS_DENSITY"}
+				/>
 
 				
 				{marker.map((municipality, index)=>{ //Markers for municipalities

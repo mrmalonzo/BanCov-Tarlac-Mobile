@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import { Text, StyleSheet,View, Linking,  TouchableOpacity, Image, ScrollView, RefreshControl, Dimensions } from "react-native";
 import {
   Layout,
@@ -73,7 +73,7 @@ export default function ({ covidData, setCovidData }) {
   const [buttonCases, setButtonCases] = useState(false);
   const [buttonRecoveries, setButtonRecoveries] = useState(false);
   const [buttonDeaths, setButtonDeaths] = useState(false);
-
+  const scrollRef = useRef();
   
   let [fontsLoaded] = useFonts({ //import fonts
     Montserrat_100Thin,
@@ -126,6 +126,19 @@ export default function ({ covidData, setCovidData }) {
     var today = new Date(newData.data.currentDateUploaded);
 		var Update = monthNames[(today.getMonth())]+' '+today.getDate()+', '+today.getFullYear();
 		await setDate(Update)
+
+     //get history for trend
+     historyCases=[];
+     historyRecoveries=[];
+     historyDeaths=[];
+     // historyDates=[startDate, Update];
+     covidData.historyCovidData.forEach((object)=>{
+       historyCases.push(object.newCases)
+       historyRecoveries.push(object.newRecoveries)
+       historyDeaths.push(object.newDeaths)
+     })
+
+     
     try{
       await AsyncStorage.setItem(`covidData`, JSON.stringify(newData.data)).then(() => setRefreshing(false)); 
     }catch(e){
@@ -134,6 +147,13 @@ export default function ({ covidData, setCovidData }) {
   }, []);
 
   const win = Dimensions.get('window'); //get window width and height
+
+  const onPressTouch = () => { //when toggle heat map is clicked - scroll to bottom screen and show heat map
+		scrollRef.current?.scrollTo({
+		  y: win.height/5,
+		  animated: true,
+		});
+	  }	
 
   const styles = StyleSheet.create({
     containerMain: {
@@ -266,14 +286,14 @@ export default function ({ covidData, setCovidData }) {
   } else {
     return (
       <Layout>
-        <ScrollView style={styles.containerMain}  refreshControl={<RefreshControl refreshing={refreshing}onRefresh={onRefresh}/> }>
+        <ScrollView ref={scrollRef} style={styles.containerMain}  refreshControl={<RefreshControl refreshing={refreshing}onRefresh={onRefresh}/> }>
           <Section style={styles.section}>
             <SectionContent style={styles.sectionContent}>
             <Text style={styles.sectionTitle} numberOfLines={1} adjustsFontSizeToFit>TARLAC COVID-19 UPDATE: </Text>
             <Text style={styles.sectionSubTitleContainer} numberOfLines={1} adjustsFontSizeToFit><Text style={styles.sectionSubTitle} numberOfLines={1} adjustsFontSizeToFit>as of </Text><Text style={styles.sectionDate} numberOfLines={1} adjustsFontSizeToFit>{date}</Text></Text>
             
               <View style = {styles.buttonContainer}>
-                <TouchableOpacity name="cases" style={[styles.buttonCases,styles.buttonCases1, {backgroundColor:buttonCases? "#FFB347":"white"}, buttonCases?styles.elevation:null]} onPress={async ()=> {await setButtonCases(!buttonCases); await setButtonRecoveries(false); await setButtonDeaths(false)}}>
+                <TouchableOpacity name="cases" style={[styles.buttonCases,styles.buttonCases1, {backgroundColor:buttonCases? "#FFB347":"white"}, buttonCases?styles.elevation:null]} onPress={async ()=> {await setButtonCases(!buttonCases); await setButtonRecoveries(false); await setButtonDeaths(false);}}  onPressOut={onPressTouch}>
                   
                     <View style={styles.containerText}>
                       <Text style={[styles.casesTitle, styles.casesTitle1, {color:buttonCases? "black":"#FFB347"}]} numberOfLines={2} adjustsFontSizeToFit>New Cases{'\n'}</Text>
@@ -282,7 +302,7 @@ export default function ({ covidData, setCovidData }) {
          
                 </TouchableOpacity>
 
-                <TouchableOpacity name="recoveries" style={[styles.buttonCases,styles.buttonCases2,{backgroundColor:buttonRecoveries? "#77DD77":"white"}, buttonRecoveries?styles.elevation:null]} onPress={async ()=> {await setButtonRecoveries(!buttonRecoveries); await setButtonCases(false);await setButtonDeaths(false)}}>
+                <TouchableOpacity name="recoveries" style={[styles.buttonCases,styles.buttonCases2,{backgroundColor:buttonRecoveries? "#77DD77":"white"}, buttonRecoveries?styles.elevation:null]} onPress={async ()=> {await setButtonRecoveries(!buttonRecoveries); await setButtonCases(false);await setButtonDeaths(false)}}  onPressOut={onPressTouch}>
                   
                     <View style={styles.containerText}>
                       <Text  style={[styles.casesTitle, styles.casesTitle2, {color:buttonRecoveries? "black":"#77DD77"}]} numberOfLines={2} adjustsFontSizeToFit>Recoveries{'\n'}</Text>
@@ -291,7 +311,7 @@ export default function ({ covidData, setCovidData }) {
                   
                 </TouchableOpacity>
 
-                <TouchableOpacity name="deaths" style={[styles.buttonCases,styles.buttonCases3, {backgroundColor:buttonDeaths? "#FF6961":"white"}, buttonDeaths?styles.elevation:null]} onPress={async ()=> {await setButtonDeaths(!buttonDeaths); await setButtonCases(false); await setButtonRecoveries(false)}}>
+                <TouchableOpacity name="deaths" style={[styles.buttonCases,styles.buttonCases3, {backgroundColor:buttonDeaths? "#FF6961":"white"}, buttonDeaths?styles.elevation:null]} onPress={async ()=> {await setButtonDeaths(!buttonDeaths); await setButtonCases(false); await setButtonRecoveries(false);}}  onPressOut={onPressTouch}>
                   
                     <View style={styles.containerText}>
                       <Text style={[styles.casesTitle, styles.casesTitle3, {color:buttonDeaths? "black":"#FF6961"}]} numberOfLines={2} adjustsFontSizeToFit>Deaths{'\n'}</Text>

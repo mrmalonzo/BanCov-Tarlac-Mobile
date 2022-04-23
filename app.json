@@ -24,6 +24,11 @@
     },
     "android": {
       "package": "uplb.mrmalonzo",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB2N04wgTD7cFtekFg_9s39XBPqcZYEm8A"
+        }
+      },
       "versionCode":1
     }
   }
